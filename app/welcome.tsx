@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
-import { Platform, Text, useWindowDimensions, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Platform, Text, useWindowDimensions, View, LayoutChangeEvent } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Marquee from '~/components/marquee';
 import ButtonCustom from '~/components/Button';
-import Cards from '~/components/Cards';
 import BannerInfo from '~/components/BannerInfo';
+import Card from '~/components/Card';
+import { router } from 'expo-router';
+
 const covers = [
   {
     id: 1,
@@ -50,7 +52,29 @@ const covers = [
   },
 ];
 
+type RootStackParamList = {
+  Home: undefined;
+  // Aquí puedes agregar otras rutas si las necesitas
+};
+
 export default function Welcome() {
+  const [availableSpace, setAvailableSpace] = useState(180);
+  const headerRef = useRef(null);
+  const cardsRef = useRef(null);
+  const buttonsRef = useRef(null);
+  const contentMeasured = useRef({
+    header: false,
+    cards: false,
+    buttons: false,
+  });
+
+  // Para almacenar las alturas medidas
+  const [heights, setHeights] = useState({
+    header: 0,
+    cards: 0,
+    buttons: 0,
+  });
+
   useEffect(() => {
     if (Platform.OS === 'android') {
       NavigationBar.setVisibilityAsync('hidden');
@@ -59,41 +83,129 @@ export default function Welcome() {
     }
   }, []);
 
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const fontSize = width < 360 ? 'text-3xl' : 'text-4xl';
+
+  // Calcular el espacio disponible cuando tengamos todas las medidas
+  useEffect(() => {
+    if (
+      contentMeasured.current.header &&
+      contentMeasured.current.cards &&
+      contentMeasured.current.buttons
+    ) {
+      // Descontamos las alturas medidas y un poco para padding/margin
+      const totalUsedSpace = heights.header + heights.cards + heights.buttons + 40; // 40px para paddings
+      // Reducimos el espacio disponible para que los botones aparezcan más arriba
+      // Usamos solo el 60% del espacio disponible para el Marquee
+      const space = Math.max(100, (height - totalUsedSpace) * 0.9);
+
+      setAvailableSpace(space);
+    }
+  }, [heights, height]);
+
+  // Funciones para medir la altura de cada sección
+  const onHeaderLayout = (event: LayoutChangeEvent) => {
+    if (!contentMeasured.current.header) {
+      const { height } = event.nativeEvent.layout;
+      setHeights((prev) => ({ ...prev, header: height }));
+      contentMeasured.current.header = true;
+    }
+  };
+
+  const onCardsLayout = (event: LayoutChangeEvent) => {
+    if (!contentMeasured.current.cards) {
+      const { height } = event.nativeEvent.layout;
+      setHeights((prev) => ({ ...prev, cards: height }));
+      contentMeasured.current.cards = true;
+    }
+  };
+
+  const onButtonsLayout = (event: LayoutChangeEvent) => {
+    if (!contentMeasured.current.buttons) {
+      const { height } = event.nativeEvent.layout;
+      setHeights((prev) => ({ ...prev, buttons: height }));
+      contentMeasured.current.buttons = true;
+    }
+  };
+
+  const onButtonStart = () => {
+    router.push('/home');
+  };
 
   return (
     <View className="flex-1 bg-gray-950">
       <StatusBar translucent style="light" />
       <SafeAreaView edges={['bottom', 'top', 'left', 'right']} className="flex-1">
         <View className="flex-1 flex-col justify-between py-2">
-          {/* superior */}
-          <View>
+          {/* Header */}
+          <View ref={headerRef} onLayout={onHeaderLayout}>
             <BannerInfo
               title="Bienvenido a Tabimanga"
               colorText="#F69B0C"
               backgroundColor="rgba(246, 155, 12, 0.1)"
             />
-            {/* Header */}
-            <View className="mb-4 w-full items-center p-5">
+            <View className="w-full items-center p-5">
               <Text className={`${fontSize} mb-2 text-center font-extrabold text-white`}>
-                Tu lector de manga
+                Lee a tu <Text className="text-[#F69B0C]">ritmo</Text>
               </Text>
-              <Text
-                className={`mb-2 text-center text-base font-medium tracking-wide text-gray-300/90`}>
+              <Text className={`text-center text-base font-medium tracking-wide text-gray-300/90`}>
                 ¡Descubre, descarga y guarda tus mangas favoritos en un solo lugar!
               </Text>
             </View>
           </View>
 
-          {/* Buttons */}
-          <View className="w-full gap-3 p-5">
-            <View className="mb-6 h-48 w-full">
-              <Marquee imgs={covers} />
+          {/* Cards - Mantenemos tamaño fijo */}
+          <View ref={cardsRef} onLayout={onCardsLayout} className="w-full px-5">
+            <View className="w-full">
+              <View className="flex-row py-2" style={{ gap: 12 }}>
+                <Card
+                  title="Biblioteca"
+                  description="Accede a cientos de mangas"
+                  icon="library"
+                  color="#F69B0C"
+                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                />
+                <Card
+                  title="Progeso"
+                  description="sigue tus mangas favoritos"
+                  icon="sync"
+                  color="#F69B0C"
+                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                />
+              </View>
+              <View className="flex-row py-2" style={{ gap: 12 }}>
+                <Card
+                  title="Avisos"
+                  description="Te indica cuando hay un nuevo capitulo"
+                  icon="notifications"
+                  color="#F69B0C"
+                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                />
+                <Card
+                  title="Comunidad"
+                  description="Puedes ingresar a nuestro discord"
+                  icon="people"
+                  color="#F69B0C"
+                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                />
+              </View>
             </View>
+          </View>
+
+          {/* Marquee - Usa todo el espacio disponible */}
+          <View
+            className="w-full p-3"
+            style={{
+              height: availableSpace,
+            }}>
+            <Marquee imgs={covers} availableSpace={availableSpace} />
+          </View>
+
+          {/* Botones */}
+          <View ref={buttonsRef} onLayout={onButtonsLayout} className="w-full gap-3 px-5 pb-5">
             <ButtonCustom
               text="¡Empezar!"
-              onPress={() => console.log('¡Empezar!')}
+              onPress={onButtonStart}
               backgroundColor={['#f59d0b', '#f97415']}
               colorText="text-black"
               borderRadius={15}
