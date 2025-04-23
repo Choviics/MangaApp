@@ -127,9 +127,8 @@ export default function Welcome() {
       contentMeasured.current.buttons = true;
     }
   };
-
   const onButtonStart = () => {
-    router.push('/home');
+    router.replace('/(tabs)/home');
   };
 
   return (

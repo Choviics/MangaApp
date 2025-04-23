@@ -1,18 +1,18 @@
 import '../global.css';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 
-export default function Layout() {
+export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack>
-        <Stack.Screen
-          name="welcome"
-          options={{ headerShown: false, presentation: 'fullScreenModal' }}
-        />
-        {/* esconde el header para la pagina de inicio*/}
-      </Stack>
-    </GestureHandlerRootView>
+    <>
+      <StatusBar style="dark" />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Stack>
+          <Stack.Screen name="welcome" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        </Stack>
+      </GestureHandlerRootView>
+    </>
   );
 }
