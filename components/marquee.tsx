@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useMemo } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -14,11 +14,11 @@ interface MarqueeProps {
 }
 
 type MarqueeItemProps = {
-  index: number;
-  scroll: SharedValue<number>;
-  itemWidth: number;
-  totalItems: number;
-  gap: number;
+  readonly index: number;
+  readonly scroll: SharedValue<number>;
+  readonly itemWidth: number;
+  readonly totalItems: number;
+  readonly gap: number;
 };
 
 // Componente individual para cada elemento del marquee
@@ -72,7 +72,7 @@ const MarqueeItem = ({
   );
 };
 
-export default function Marquee({ imgs, renderItem, availableSpace }: MarqueeProps) {  
+export default function Marquee({ imgs, renderItem, availableSpace }: Readonly<MarqueeProps>) {  
   // Gap fijo entre elementos
   const GAP = 8;
 

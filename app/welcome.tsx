@@ -132,7 +132,7 @@ export default function Welcome() {
   };
 
   return (
-    <View className="flex-1 bg-gray-950">
+    <View className="flex-1" style={{ backgroundColor: "#000014" }}>
       <StatusBar translucent style="light" />
       <SafeAreaView edges={['bottom', 'top', 'left', 'right']} className="flex-1">
         <View className="flex-1 flex-col justify-between py-2">
@@ -141,7 +141,7 @@ export default function Welcome() {
             <BannerInfo
               title="Bienvenido a Tabimanga"
               colorText="#F69B0C"
-              backgroundColor="rgba(246, 155, 12, 0.1)"
+              backgroundColor="#121226"
             />
             <View className="w-full items-center p-5">
               <Text className={`${fontSize} mb-2 text-center font-extrabold text-white`}>
@@ -162,14 +162,16 @@ export default function Welcome() {
                   description="Accede a cientos de mangas"
                   icon="library"
                   color="#F69B0C"
-                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                  backgroundIcon="rgba(246, 155, 12, 0.1)"
+                  backgroundColor="#121226"
                 />
                 <Card
                   title="Progeso"
                   description="sigue tus mangas favoritos"
                   icon="sync"
                   color="#F69B0C"
-                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                  backgroundIcon="rgba(246, 155, 12, 0.1)"
+                  backgroundColor="#121226"
                 />
               </View>
               <View className="flex-row py-2" style={{ gap: 12 }}>
@@ -178,14 +180,16 @@ export default function Welcome() {
                   description="Te indica cuando hay un nuevo capitulo"
                   icon="notifications"
                   color="#F69B0C"
-                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                  backgroundIcon="rgba(246, 155, 12, 0.1)"
+                  backgroundColor="#121226"
                 />
                 <Card
                   title="Comunidad"
                   description="Puedes ingresar a nuestro discord"
                   icon="people"
                   color="#F69B0C"
-                  backgroundColor="rgba(246, 155, 12, 0.1)"
+                  backgroundIcon="rgba(246, 155, 12, 0.1)"
+                  backgroundColor="#121226"
                 />
               </View>
             </View>
@@ -212,7 +216,7 @@ export default function Welcome() {
             <ButtonCustom
               text="Sobre nosotros"
               onPress={() => console.log('sobre nosotros')}
-              backgroundColor="#111827"
+              backgroundColor="#121226"
               colorText="text-white"
               borderRadius={15}
             />
