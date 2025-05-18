@@ -1,10 +1,11 @@
 import { View, Image, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useTheme } from '~/utils/themes';
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 type MangaRowProps = {
-    readonly mangas: any[]; 
-}
+  readonly mangas: any[];
+};
 
 export default function MangaRow({ mangas }: Readonly<MangaRowProps>) {
   const { theme } = useTheme();
@@ -18,10 +19,20 @@ export default function MangaRow({ mangas }: Readonly<MangaRowProps>) {
     setLoadingImages((prev) => ({ ...prev, [mangaId]: true }));
   };
 
+  const handleMangaPress = (mangaId: string, title: string) => {
+    router.push({
+      pathname: '/MangaPage',
+      params: { id: mangaId, title: title },
+    });
+  };
+
   return (
     <View className="flex-row overflow-x-auto">
       {mangas.map((manga) => (
-        <Pressable key={manga.mangaId} className="mr-2">
+        <Pressable
+          key={manga.mangaId}
+          className="mr-2"
+          onPress={() => handleMangaPress(manga.mangaId, manga.title)}>
           {({ pressed }) => (
             <>
               <View className="relative h-64 w-40">

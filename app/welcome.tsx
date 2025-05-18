@@ -132,17 +132,19 @@ export default function Welcome() {
   };
 
   return (
-    <View className="flex-1" style={{ backgroundColor: "#000014" }}>
+    <View className="flex-1" style={{ backgroundColor: '#000014' }}>
       <StatusBar translucent style="light" />
       <SafeAreaView edges={['bottom', 'top', 'left', 'right']} className="flex-1">
         <View className="flex-1 flex-col justify-between py-2">
           {/* Header */}
           <View ref={headerRef} onLayout={onHeaderLayout}>
-            <BannerInfo
-              title="Bienvenido a Tabimanga"
-              colorText="#F69B0C"
-              backgroundColor="#121226"
-            />
+            <View className="items-center">
+              <BannerInfo
+                title="Bienvenido a Tabimanga"
+                colorText="#F69B0C"
+                backgroundColor="#121226"
+              />
+            </View>
             <View className="w-full items-center p-5">
               <Text className={`${fontSize} mb-2 text-center font-extrabold text-white`}>
                 Lee a tu <Text className="text-[#F69B0C]">ritmo</Text>
@@ -212,6 +214,7 @@ export default function Welcome() {
               backgroundColor={['#f59d0b', '#f97415']}
               colorText="text-black"
               borderRadius={15}
+              centered={true}
             />
             <ButtonCustom
               text="Sobre nosotros"
@@ -219,6 +222,7 @@ export default function Welcome() {
               backgroundColor="#121226"
               colorText="text-white"
               borderRadius={15}
+              centered={true}
             />
           </View>
         </View>

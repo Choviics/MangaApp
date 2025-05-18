@@ -260,3 +260,57 @@ export const getRecentCreatedMangas = async (): Promise<any> => {
     throw error;
   }
 }
+
+export const getMangaInfo = async (id: string): Promise<any> => {
+  try {
+    const response = await axios.get(`${MANGA_URL}/${id}`, {
+      params: {
+        'includes[]': ['author', 'cover_art'],
+      },
+    });
+
+    const manga = response.data.data;
+
+    const coverUrl = manga.relationships?.find((rel: any) => rel.type === 'cover_art')?.attributes?.fileName
+      ? `${COVER_BASE_URL}/${manga.id}/${manga.relationships.find((rel: any) => rel.type === 'cover_art').attributes.fileName}`
+      : null;
+
+    const author = manga.relationships?.find((rel: any) => rel.type === 'author')?.attributes?.name;
+
+    const tags = manga.attributes.tags?.map((tag: any) => tag.attributes?.name?.en).filter(Boolean) ?? [];
+
+    const description = manga.attributes.description?.['es-la'] ?? 
+                        manga.attributes.description?.['es'] ?? 
+                        manga.attributes.description?.['en'] ?? 
+                        'Sin descripción';
+
+    // Extraer el título de la misma manera que en otras funciones
+    let title;
+    if (manga.attributes.title.en) {
+      title = manga.attributes.title.en;
+    } else if (manga.attributes.title['es-la']) {
+      title = manga.attributes.title['es-la'];
+    } else if (manga.attributes.title.es) {
+      title = manga.attributes.title.es;
+    } else {
+      const altTitle = manga.attributes.altTitles?.find(
+        (alt: any) => alt['es'] ?? alt['es-la'] ?? alt['en']
+      );
+      title = altTitle ? (altTitle['es'] ?? altTitle['es-la'] ?? altTitle['en']) : 'Sin título';
+    }
+
+    return {
+      title,
+      description: description,
+      status: manga.attributes.status ?? 'Desconocido',
+      year: manga.attributes.year ?? 'Desconocido',
+      demographic: manga.attributes.publicationDemographic ?? 'Desconocido',
+      coverUrl,
+      author: author ?? 'Autor desconocido',
+      tags: tags,
+    };
+  } catch (error) {
+    console.error('Error al obtener el manga por ID:', error);
+    throw error;
+  }
+};

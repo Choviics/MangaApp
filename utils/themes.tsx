@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const defaultTheme = {
-  name: 'dark',
+  name: 'Kintsugi',
   background: '#000014',
   text: '#FFFFFF',
   primary: '#F69B0C',
@@ -12,10 +13,50 @@ export const defaultTheme = {
   card: '#121226',
   error: '#F87171',
   success: '#34D399',
-  tabBarBackground: '#111827',
-  tabBarActiveTint: '#60A5FA',
-  tabBarInactiveTint: '#9CA3AF',
   statusBar: 'light',
+  // Estados de publicación
+  statusCompleted: '#00B4D8',    // Celeste
+  statusOngoing: '#34D399',      // Verde suave
+  statusCancelled: '#F87171',    // Rojo suave
+  statusHiatus: '#9CA3AF',       // Gris
+};
+
+export const redTheme = {
+  name: 'Akatsuki',
+  background: '#0A0E1F',
+  text: '#FFFFFF',
+  primary: '#E30613',
+  secondary: '#8D95A7',
+  accent: '#F52735',
+  border: '#374151',
+  card: '#111C3E',
+  error: '#EF4444',
+  success: '#059669',
+  statusBar: 'light',
+  // Estados de publicación
+  statusCompleted: '#00B4D8',    // Celeste
+  statusOngoing: '#34D399',      // Verde suave
+  statusCancelled: '#EF4444',    // Rojo brillante
+  statusHiatus: '#8D95A7',       // Gris azulado
+};
+
+export const greenTheme = {
+  name: 'green',
+  background: '#111C3E',
+  text: '#ffffff',
+  primary: '#00BF8F',
+  secondary: '#9EA6BB',
+  accent: '#19D9A6',
+  border: '#DDD6FE',
+  card: '#1A1A2E',
+  error: '#EF4444',
+  success: '#10B981',
+  statusBar: 'light',
+  // Estados de publicación
+  statusCompleted: '#00B4D8',    // Celeste
+  statusOngoing: '#F59E0B',      // Naranja
+  statusCancelled: '#EF4444',    // Rojo
+  statusHiatus: '#9EA6BB',       // Gris claro
 };
 
 export const blueTheme = {
@@ -23,54 +64,22 @@ export const blueTheme = {
   background: '#EFF6FF',
   text: '#1E3A8A',
   primary: '#2563EB',
-  secondary: '#64748B',
+  secondary: '#cdcdd3',
   accent: '#3B82F6',
   border: '#BFDBFE',
   card: '#DBEAFE',
   error: '#F87171',
   success: '#34D399',
-  tabBarBackground: '#DBEAFE',
-  tabBarActiveTint: '#2563EB',
-  tabBarInactiveTint: '#64748B',
   statusBar: 'dark',
-};
-
-export const purpleTheme = {
-  name: 'purple',
-  background: '#1c1c29',
-  text: '#ffffff',
-  primary: '#8B5CF6',
-  secondary: '#6B7280',
-  accent: '#A78BFA',
-  border: '#DDD6FE',
-  card: '#525152',
-  error: '#EF4444',
-  success: '#10B981',
-  tabBarBackground: '#EDE9FE',
-  tabBarActiveTint: '#8B5CF6',
-  tabBarInactiveTint: '#6B7280',
-  statusBar: 'light',
-};
-
-export const greenTheme = {
-  name: 'green',
-  background: '#ECFDF5',
-  text: '#064E3B',
-  primary: '#10B981',
-  secondary: '#6B7280',
-  accent: '#34D399',
-  border: '#A7F3D0',
-  card: '#D1FAE5',
-  error: '#EF4444',
-  success: '#059669',
-  tabBarBackground: '#D1FAE5',
-  tabBarActiveTint: '#10B981',
-  tabBarInactiveTint: '#6B7280',
-  statusBar: 'dark',
+  // Estados de publicación
+  statusCompleted: '#00B4D8',    // Celeste
+  statusOngoing: '#34D399',      // Verde claro
+  statusCancelled: '#F87171',    // Rojo claro
+  statusHiatus: '#64748B',       // Gris azulado
 };
 
 // Colección de todos los temas disponibles
-export const availableThemes = [defaultTheme, blueTheme, purpleTheme, greenTheme];
+export const availableThemes = [defaultTheme, redTheme, greenTheme, blueTheme];
 
 // Tipo para nuestros temas
 export type Theme = (typeof availableThemes)[0];
@@ -86,6 +95,9 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Clave para almacenar el tema en AsyncStorage
+const THEME_STORAGE_KEY = '@manga_app_theme';
+
 // Proveedor del tema
 type ThemeProviderProps = {
   children: ReactNode;
@@ -93,20 +105,54 @@ type ThemeProviderProps = {
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const colorScheme = useColorScheme();
-  // Definimos lightTheme si no existe
   const [currentTheme, setCurrentTheme] = useState<Theme>(
     colorScheme === 'dark' ? defaultTheme : availableThemes[0]
   );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Cargar el tema guardado al iniciar
+  useEffect(() => {
+    const loadSavedTheme = async () => {
+      try {
+        const savedThemeName = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (savedThemeName) {
+          const foundTheme = availableThemes.find(theme => theme.name === savedThemeName);
+          if (foundTheme) {
+            setCurrentTheme(foundTheme);
+          }
+        }
+      } catch (error: unknown) {
+        console.error('Error al cargar el tema guardado:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSavedTheme();
+  }, []);
 
   const isDark = currentTheme.name === 'dark';
+  
   const toggleTheme = () => {
-    setCurrentTheme((prev) => (prev.name === 'dark' ? availableThemes[0] : defaultTheme));
+    setCurrentTheme((prev) => {
+      const newTheme = prev.name === 'dark' ? availableThemes[0] : defaultTheme;
+      // Guardar la preferencia
+      AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme.name).catch((error: unknown) => 
+        console.error('Error al guardar el tema:', error)
+      );
+      return newTheme;
+    });
   };
 
   const setTheme = (themeName: string) => {
     const newTheme =
       availableThemes.find((theme) => theme.name === themeName) || availableThemes[0];
     setCurrentTheme(newTheme);
+    
+    // Guardar la preferencia del usuario
+    AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme.name).catch((error: unknown) => 
+      console.error('Error al guardar el tema:', error)
+    );
   };
 
   const contextValue = useMemo(
@@ -119,6 +165,10 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     }),
     [currentTheme, isDark, toggleTheme, setTheme, availableThemes]
   );
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={contextValue}>
