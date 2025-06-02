@@ -41,7 +41,7 @@ export const redTheme = {
 };
 
 export const greenTheme = {
-  name: 'green',
+  name: 'Midori',
   background: '#111C3E',
   text: '#ffffff',
   primary: '#00BF8F',
@@ -60,7 +60,7 @@ export const greenTheme = {
 };
 
 export const blueTheme = {
-  name: 'blue',
+  name: 'Aozora',
   background: '#EFF6FF',
   text: '#1E3A8A',
   primary: '#2563EB',

@@ -43,7 +43,7 @@ export default function ProfileScreen() {
         removeAllMangas();
         setCacheModalVisible(false);
       },
-      icon: 'heart-outline',
+      icon: 'heart',
     },
     {
       name: 'Borrar leidos',
@@ -51,7 +51,7 @@ export default function ProfileScreen() {
         removeAllReads();
         setCacheModalVisible(false);
       },
-      icon: 'eye-outline',
+      icon: 'eye',
     },
     {
       name: 'Borrar todo',
@@ -60,7 +60,7 @@ export default function ProfileScreen() {
         removeAllReads();
         setCacheModalVisible(false);
       },
-      icon: 'close-circle-outline',
+      icon: 'close-circle',
     },
   ];
 
@@ -75,7 +75,7 @@ export default function ProfileScreen() {
         const emailUrl = 'mailto:vgcordovacastillo@gmail.com';
         Linking.openURL(emailUrl);
       },
-      icon: 'mail-outline',
+      icon: 'mail',
     },
     {
       name: 'Discord',

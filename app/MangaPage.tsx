@@ -18,7 +18,7 @@ import ChaptersCards from '~/components/ChaptersCards';
 import BannerInfo from '~/components/BannerInfo';
 import Button from '~/components/Button';
 import BackBar from '~/components/BackBar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import ChargePage from './ChargePage';
 import { MangaInfo } from '~/api/interfaces';
@@ -258,7 +258,7 @@ export default function ChapterPage() {
         icon="share-outline"
         onPressIcon={handleSharePress}
       />
-      <View className="px-4">
+      <SafeAreaView className="px-4">
         <Animated.ScrollView
           contentContainerStyle={{ paddingBottom: 100, paddingTop: topInsets + 50 }}
           showsVerticalScrollIndicator={false}
@@ -392,7 +392,7 @@ export default function ChapterPage() {
             </View>
           )}
         </Animated.ScrollView>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
