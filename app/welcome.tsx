@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Text, useWindowDimensions, View, LayoutChangeEvent } from 'react-native';
+import {
+  Platform,
+  Text,
+  useWindowDimensions,
+  View,
+  LayoutChangeEvent,
+  Linking,
+} from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -228,7 +235,10 @@ export default function Welcome() {
             />
             <ButtonCustom
               text="Sobre nosotros"
-              onPress={() => console.log('sobre nosotros')}
+              onPress={() => {
+                const projectUrl = 'https://github.com/Choviics/MangaApp';
+                Linking.openURL(projectUrl);
+              }}
               backgroundColor="#121226"
               colorText="text-white"
               borderRadius={15}
