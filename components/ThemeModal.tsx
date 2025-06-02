@@ -24,14 +24,12 @@ const ThemeModal = ({ visible, onClose }: ThemeModalProps) => {
     >
       <SafeAreaView className="flex-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
         <View className="flex-1 justify-center items-center">
-          {/* Overlay semi-transparente que cubre toda la pantalla incluyendo áreas seguras */}
           <TouchableOpacity 
             className="absolute inset-0" 
             activeOpacity={1}
             onPress={onClose} 
           />
           
-          {/* Contenido del modal centrado */}
           <View 
             className="w-[90%] max-w-md rounded-2xl p-4"
             style={{ backgroundColor: theme.card }}

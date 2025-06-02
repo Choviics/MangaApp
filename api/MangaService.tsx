@@ -1,20 +1,14 @@
 import axios from 'axios';
+import { MangaInfo } from './interfaces';
 
 const CHAPTER_URL = 'https://api.mangadex.org/chapter';
 const MANGA_URL = 'https://api.mangadex.org/manga';
 const COVER_BASE_URL = 'https://uploads.mangadex.org/covers';
 
-interface MangaInfo {
-  mangaId: string;
-  title: string;
-  coverUrl: string | null;
-  language: string;
-}
-
-export const getLastUpdatedMangas = async (limit: number = 10): Promise<MangaInfo[]> => {
+  export const getLastUpdatedMangas = async (limit: number = 10): Promise<MangaInfo[]> => {
   try {
     let offset = 0;
-    const pageLimit = 100; // máximo que devuelve la API por petición
+    const pageLimit = 100;
     const preliminaryMangas: {
       mangaId: string;
       lastChapter: string;
@@ -59,7 +53,6 @@ export const getLastUpdatedMangas = async (limit: number = 10): Promise<MangaInf
     }
 
     if (preliminaryMangas.length === 0) {
-      console.log('No se encontraron mangas preliminares');
       return [];
     }
 
@@ -94,12 +87,6 @@ export const getLastUpdatedMangas = async (limit: number = 10): Promise<MangaInf
           error
         );
       }
-    }
-
-    // Verificamos si hay mangas faltantes
-    const missingIds = mangaIds.filter((id) => !allMangaData.some((m) => m.id === id));
-    if (missingIds.length > 0) {
-      console.log(`⚠️ IDs faltantes en la respuesta: ${missingIds}`);
     }
 
     // 3. Unir info del capítulo con info del manga
@@ -207,7 +194,7 @@ export const getPopularMangas = async (): Promise<MangaInfo[]> => {
   }
 };
 
-export const getRecentCreatedMangas = async (): Promise<any> => {
+export const getRecentCreatedMangas = async (): Promise<MangaInfo[]> => {
   try {
     const response = await axios.get(MANGA_URL, {
       params: {
@@ -259,7 +246,7 @@ export const getRecentCreatedMangas = async (): Promise<any> => {
     console.error('Error al obtener los últimos mangas:', error);
     throw error;
   }
-}
+};
 
 export const getMangaInfo = async (id: string): Promise<any> => {
   try {
@@ -271,18 +258,21 @@ export const getMangaInfo = async (id: string): Promise<any> => {
 
     const manga = response.data.data;
 
-    const coverUrl = manga.relationships?.find((rel: any) => rel.type === 'cover_art')?.attributes?.fileName
+    const coverUrl = manga.relationships?.find((rel: any) => rel.type === 'cover_art')?.attributes
+      ?.fileName
       ? `${COVER_BASE_URL}/${manga.id}/${manga.relationships.find((rel: any) => rel.type === 'cover_art').attributes.fileName}`
       : null;
 
     const author = manga.relationships?.find((rel: any) => rel.type === 'author')?.attributes?.name;
 
-    const tags = manga.attributes.tags?.map((tag: any) => tag.attributes?.name?.en).filter(Boolean) ?? [];
+    const tags =
+      manga.attributes.tags?.map((tag: any) => tag.attributes?.name?.en).filter(Boolean) ?? [];
 
-    const description = manga.attributes.description?.['es-la'] ?? 
-                        manga.attributes.description?.['es'] ?? 
-                        manga.attributes.description?.['en'] ?? 
-                        'Sin descripción';
+    const description =
+      manga.attributes.description?.['es-la'] ??
+      manga.attributes.description?.['es'] ??
+      manga.attributes.description?.['en'] ??
+      'Sin descripción';
 
     // Extraer el título de la misma manera que en otras funciones
     let title;
@@ -311,6 +301,63 @@ export const getMangaInfo = async (id: string): Promise<any> => {
     };
   } catch (error) {
     console.error('Error al obtener el manga por ID:', error);
+    throw error;
+  }
+};
+
+export const searchNameManga = async (name: string, limit: number = 100): Promise<any> => {
+  try {
+    const response = await axios.get(MANGA_URL, {
+      params: {
+        title: name,
+        limit: limit,
+        'availableTranslatedLanguage[]': ['es', 'es-la'],
+        'includes[]': ['cover_art'],
+        offset: 0,
+      },
+    });
+
+    // Transformar los datos para obtener solo lo que necesitas
+    const matchMangas = response.data.data.map((manga: any) => {
+      // Obtener el id del manga
+      const mangaId = manga.id;
+
+      // Obtener el título en español o inglés
+      let title;
+      if (manga.attributes.title.en) {
+        title = manga.attributes.title.en;
+      } else if (manga.attributes.title['es-la']) {
+        title = manga.attributes.title['es-la'];
+      } else if (manga.attributes.title.es) {
+        title = manga.attributes.title.es;
+      } else {
+        // Buscar en altTitles para español
+        const altTitle = manga.attributes.altTitles?.find(
+          (alt: any) => alt['es'] ?? alt['es-la'] ?? alt['en']
+        );
+        title = altTitle ? (altTitle['es'] ?? altTitle['es-la'] ?? altTitle['en']) : 'Sin título';
+      }
+
+      // Obtener el filename de la cover_art y construir la URL
+      let coverUrl = null;
+      const coverArt = manga.relationships?.find((rel: any) => rel.type === 'cover_art');
+      if (coverArt?.attributes?.fileName) {
+        coverUrl = `${COVER_BASE_URL}/${mangaId}/${coverArt.attributes.fileName}`;
+      }
+
+      const language = 'es';
+
+      return {
+        mangaId,
+        title,
+        coverUrl,
+        language,
+      };
+    });
+
+    return matchMangas;
+  } catch (error) {
+    console.error('Error al obtener los mangas populares:', error);
     throw error;
   }
 };

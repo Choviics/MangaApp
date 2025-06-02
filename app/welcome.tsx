@@ -52,11 +52,6 @@ const covers = [
   },
 ];
 
-type RootStackParamList = {
-  Home: undefined;
-  // Aquí puedes agregar otras rutas si las necesitas
-};
-
 export default function Welcome() {
   const [availableSpace, setAvailableSpace] = useState(180);
   const headerRef = useRef(null);
@@ -197,7 +192,7 @@ export default function Welcome() {
             </View>
           </View>
 
-          {/* Marquee - Usa todo el espacio disponible */}
+          {/* usa el espacio disponible */}
           <View
             className="w-full p-3"
             style={{

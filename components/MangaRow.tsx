@@ -2,12 +2,9 @@ import { View, Image, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useTheme } from '~/utils/themes';
 import { useState } from 'react';
 import { router } from 'expo-router';
+import { MangaInfo } from '~/api/interfaces';
 
-type MangaRowProps = {
-  readonly mangas: any[];
-};
-
-export default function MangaRow({ mangas }: Readonly<MangaRowProps>) {
+export default function MangaRow({ mangas }: Readonly<{ mangas: MangaInfo[] }>) {
   const { theme } = useTheme();
   const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
 
@@ -22,7 +19,7 @@ export default function MangaRow({ mangas }: Readonly<MangaRowProps>) {
   const handleMangaPress = (mangaId: string, title: string) => {
     router.push({
       pathname: '/MangaPage',
-      params: { id: mangaId, title: title },
+      params: { id: mangaId, title: title, language: 'es' },
     });
   };
 
@@ -37,7 +34,7 @@ export default function MangaRow({ mangas }: Readonly<MangaRowProps>) {
             <>
               <View className="relative h-64 w-40">
                 <Image
-                  source={{ uri: manga.coverUrl }}
+                  source={{ uri: manga.coverUrl ?? '' }}
                   className={`h-64 w-40 rounded-lg shadow-md ${pressed ? 'opacity-50' : ''}`}
                   onLoadStart={() => handleImageLoadStart(manga.mangaId)}
                   onLoad={() => handleImageLoad(manga.mangaId)}

@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const CHAPTER_URL = 'https://api.mangadex.org/chapter';
+const IMAGES_URL = 'https://api.mangadex.org/at-home/server';
 const MANGA_URL = 'https://api.mangadex.org/manga';
-const COVER_BASE_URL = 'https://uploads.mangadex.org/covers';
 
 export const getMangaChapters = async (id: string) => {
   let response = await axios.get(`${MANGA_URL}/${id}/feed`, {
@@ -15,7 +14,7 @@ export const getMangaChapters = async (id: string) => {
       'includes[]': ['scanlation_group'],
     },
   });
-  
+
   // Si no hay datos, intentar de nuevo con includeExternalUrl: 1
   if (response.data.data.length === 0) {
     response = await axios.get(`${MANGA_URL}/${id}/feed`, {
@@ -38,7 +37,7 @@ export const getMangaChapters = async (id: string) => {
       chapter: string;
       volume: string;
       chapterNum: number;
-      versions: Array<{
+      versions: {
         id: string;
         title: string | null;
         scanlationGroup: {
@@ -46,22 +45,24 @@ export const getMangaChapters = async (id: string) => {
           name: string;
         } | null;
         translatedLanguage: string;
-      }>;
+      }[];
     }
   > = {};
 
   chaptersData.forEach((chapter: any) => {
     const chapterNumber = chapter.attributes.chapter;
     const chapterFloat = parseFloat(chapterNumber);
-    
+
     const scanlationGroupRel = chapter.relationships.find(
       (rel: any) => rel.type === 'scanlation_group'
     );
 
-    const scanlationGroup = scanlationGroupRel?.attributes ? {
-      id: scanlationGroupRel.id,
-      name: scanlationGroupRel.attributes.name,
-    } : null;
+    const scanlationGroup = scanlationGroupRel?.attributes
+      ? {
+          id: scanlationGroupRel.id,
+          name: scanlationGroupRel.attributes.name,
+        }
+      : null;
 
     if (!groupedChapters[chapterNumber]) {
       groupedChapters[chapterNumber] = {
@@ -84,6 +85,20 @@ export const getMangaChapters = async (id: string) => {
   const sortedChapters = Object.values(groupedChapters).sort((a, b) => a.chapterNum - b.chapterNum);
 
   return sortedChapters;
+};
+
+export const getMangaImages = async (id: string) => {
+  const response = await axios.get(`${IMAGES_URL}/${id}`);
+  const { baseUrl } = response.data;
+  const {
+    hash, // ➜ 5d580c29cfb3bcbc5638a502af874d93
+    data, // ➜ ["1-22ed7c68…", …]
+  } = response.data.chapter;
+
+  // Obtener las imágenes del capítulo
+  const images = data.map((image: string) => `${baseUrl}/data/${hash}/${image}`);
+
+  return images;
 };
 
 // Función auxiliar para obtener el título del capítulo

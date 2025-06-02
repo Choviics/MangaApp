@@ -1,27 +1,92 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '~/utils/themes';
+import { useState, useCallback, useRef } from 'react';
+import SearchBar from '~/components/SearchBar';
+import { searchNameManga } from '~/api/MangaService';
+import { MangaInfo } from '~/api/interfaces';
+import MangaColumns from '~/components/MangaColumns';
 
 export default function SearchScreen() {
+  const { theme } = useTheme();
+  const timeoutIdRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const [searchText, setSearchText] = useState('');
+  const [matchMangas, setMatchMangas] = useState<MangaInfo[]>([]);
+  const [screenCase, setScreenCase] = useState< 1 | 2  | 3>(1);
+
+  // Debounce: espera 500ms después de que el usuario deje de escribir
+  const handleSearch = useCallback((name: string) => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
+
+    setSearchText(name);
+
+    timeoutIdRef.current = setTimeout(async () => {
+      if (!name.trim()) {
+        setScreenCase(1);
+        setMatchMangas([]);
+        return;
+      }
+      const response = await searchNameManga(name);
+      setMatchMangas(response);
+      if (response.length === 0) {
+        setScreenCase(3);
+      } else {
+        setScreenCase(2);
+      }
+    }, 600);
+  }, []);
+
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
-      <View className="p-4">
-        <Text className="text-2xl font-bold mb-4">Buscar</Text>
-        
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
+      <View className="flex-1 p-4">
         {/* Barra de búsqueda */}
-        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2 mb-4">
-          <Ionicons name="search" size={20} color="#6B7280" />
-          <TextInput 
-            placeholder="Buscar manga..." 
-            className="flex-1 ml-2 text-gray-800" 
-          />
-        </View>
-        
+        <SearchBar
+          placeHolder="Buscar manga por nombre..."
+          onSearch={handleSearch}
+          value={searchText}
+        />
         {/* Resultados de búsqueda o sugerencias */}
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-gray-500">Introduce tu búsqueda para encontrar mangas</Text>
-        </View>
+        {(() => {
+          switch(screenCase) {
+            case 1:
+              return (
+                <View className="flex-1 items-center justify-center">
+                  <Text className="mb-4 text-4xl text-center " style={{ color: theme.text }}>
+                    Busca tu manga favorito
+                  </Text>
+                  <Image
+                    source={require('../../assets/empty-text.png')}
+                    style={{
+                      width: 200,
+                      height: 200,
+                    }}
+                  />
+                </View>
+              );
+            case 2:
+              return <MangaColumns mangas={matchMangas} />;
+            case 3:
+              return (
+                <View className="flex-1 items-center justify-center">
+                  <Text className="mb-4 text-4xl text-center " style={{ color: theme.text }}>
+                    No se encontraron resultados
+                  </Text>
+                  <Image
+                    source={require('../../assets/notFound.png')}
+                    style={{
+                      width: 200,
+                      height: 200,
+                    }}
+                  />
+                </View>
+              );
+            default:
+              return null;
+          }
+        })()}
       </View>
     </SafeAreaView>
   );
-} 
+}

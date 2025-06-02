@@ -1,43 +1,43 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-// Definimos la interfaz para los mangas guardados
-interface SavedManga {
-  id: number;
-  title: string;
-  author: string;
-}
+import { useEffect, useCallback } from 'react';
+import MangaColumns from '~/components/MangaColumns';
+import { useTheme } from '~/utils/themes';
+import BannerPage from '~/components/BannerPage';
+import { useSavedMangas } from '../../api/mangaStore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function SavedScreen() {
-  // Datos de ejemplo - reemplaza con datos reales de tu aplicación
-  const savedMangas: SavedManga[] = [];
+  const { savedMangas, refreshSavedMangas } = useSavedMangas();
+  const { theme } = useTheme();
+
+  // Refresca los mangas guardados cuando la pantalla recibe el foco
+  useFocusEffect(
+    useCallback(() => {
+      refreshSavedMangas();
+    }, [refreshSavedMangas])
+  );
+
+  // También refresca al montar el componente
+  useEffect(() => {
+    refreshSavedMangas();
+  }, [refreshSavedMangas]);
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-gray-50">
-      <View className="p-4 flex-1">
-        <Text className="text-2xl font-bold mb-4">Mis Mangas Guardados</Text>
-        
+    <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
+      <BannerPage title="Mangas Guardados" icon="heart" />
+      <View className="flex-1 p-4">
         {savedMangas.length === 0 ? (
           <View className="flex-1 items-center justify-center">
-            <Text className="text-gray-500 text-center mb-2">No tienes mangas guardados</Text>
-            <Text className="text-gray-500 text-center">Explora la biblioteca y guarda tus mangas favoritos</Text>
+            <Text className="mb-2 text-center text-gray-500">No tienes mangas guardados</Text>
+            <Text className="text-center text-gray-500">
+              Explora la biblioteca y guarda tus mangas favoritos
+            </Text>
           </View>
         ) : (
-          <FlatList
-            data={savedMangas}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View className="bg-white p-3 rounded-lg mb-3 flex-row items-center">
-                <View className="mr-3 w-16 h-24 bg-gray-200 rounded-md"></View>
-                <View className="flex-1">
-                  <Text className="font-semibold text-lg">{item.title}</Text>
-                  <Text className="text-gray-500">{item.author}</Text>
-                </View>
-              </View>
-            )}
-          />
+          <MangaColumns mangas={savedMangas} />
         )}
       </View>
     </SafeAreaView>
   );
-} 
+}
