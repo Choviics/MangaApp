@@ -8,6 +8,7 @@ import ButtonCustom from '~/components/Button';
 import BannerInfo from '~/components/BannerInfo';
 import Card from '~/components/Card';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const covers = [
   {
@@ -70,19 +71,16 @@ export default function Welcome() {
     buttons: 0,
   });
 
+  const { width, height } = useWindowDimensions();
+  const fontSize = width < 360 ? 'text-3xl' : 'text-4xl';
+
+  // Calcular el espacio disponible cuando tengamos todas las medidas
   useEffect(() => {
     if (Platform.OS === 'android') {
       NavigationBar.setVisibilityAsync('hidden');
       NavigationBar.setBackgroundColorAsync('rgba(0,0,0,0)');
       NavigationBar.setBehaviorAsync('overlay-swipe');
     }
-  }, []);
-
-  const { width, height } = useWindowDimensions();
-  const fontSize = width < 360 ? 'text-3xl' : 'text-4xl';
-
-  // Calcular el espacio disponible cuando tengamos todas las medidas
-  useEffect(() => {
     if (
       contentMeasured.current.header &&
       contentMeasured.current.cards &&
@@ -122,7 +120,24 @@ export default function Welcome() {
       contentMeasured.current.buttons = true;
     }
   };
+
+  const STORAGE_KEY = `@welcome_page_seen`;
+
+  const markWelcomePageAsVisited = async () => {
+    try {
+      const welcomeData = {
+        isVisited: true,
+        timestamp: new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(welcomeData));
+    } catch (error) {
+      console.error('Error al guardar el estado de la página de bienvenida:', error);
+    }
+  };
+
   const onButtonStart = () => {
+    markWelcomePageAsVisited();
     router.replace('/(tabs)/home');
   };
 

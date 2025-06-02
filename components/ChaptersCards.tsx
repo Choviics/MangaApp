@@ -148,7 +148,7 @@ export default function ChaptersCards({
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [readChapters, setReadChapters] = useState<ReadChapterVersions>({});
 
-  // Clave única para el manga
+  // Clave única para el capitulo
   const STORAGE_KEY = `@manga_read_chapters_${mangaId}`;
 
   const loadReadChapters = async () => {
